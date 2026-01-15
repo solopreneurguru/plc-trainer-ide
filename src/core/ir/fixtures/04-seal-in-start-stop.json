@@ -1,0 +1,92 @@
+{
+  "version": "1.0",
+  "organization_blocks": [
+    {
+      "id": "OB1",
+      "name": "Main",
+      "type": "cyclic",
+      "networks": [
+        {
+          "id": "network_1",
+          "title": "Start/Seal Rung",
+          "comment": "Pressing start_button latches motor_output ON via self-sealing",
+          "statements": [
+            {
+              "type": "assignment",
+              "id": "stmt_1",
+              "target": {
+                "tag": "motor_output"
+              },
+              "expression": {
+                "expr_type": "binary",
+                "operator": "OR",
+                "left": {
+                  "expr_type": "operand",
+                  "operand": {
+                    "tag": "start_button"
+                  }
+                },
+                "right": {
+                  "expr_type": "operand",
+                  "operand": {
+                    "tag": "motor_output"
+                  }
+                }
+              },
+              "layout_hints": {
+                "language": "LAD",
+                "lad": {
+                  "rung_number": 1,
+                  "is_branch_start": true,
+                  "is_branch_end": true
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "network_2",
+          "title": "Stop Rung",
+          "comment": "Pressing stop_button (NC logic) turns motor_output OFF. Rung 2 overwrites Rung 1 (scan order dominance).",
+          "statements": [
+            {
+              "type": "assignment",
+              "id": "stmt_2",
+              "target": {
+                "tag": "motor_output"
+              },
+              "expression": {
+                "expr_type": "binary",
+                "operator": "AND",
+                "left": {
+                  "expr_type": "operand",
+                  "operand": {
+                    "tag": "motor_output"
+                  }
+                },
+                "right": {
+                  "expr_type": "unary",
+                  "operator": "NOT",
+                  "operand": {
+                    "expr_type": "operand",
+                    "operand": {
+                      "tag": "stop_button"
+                    }
+                  }
+                }
+              },
+              "layout_hints": {
+                "language": "LAD",
+                "lad": {
+                  "rung_number": 2
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "functions": [],
+  "function_blocks": []
+}

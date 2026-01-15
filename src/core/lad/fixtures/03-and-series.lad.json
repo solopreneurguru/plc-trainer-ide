@@ -1,0 +1,32 @@
+{
+  "version": "1.0",
+  "networks": [
+    {
+      "id": "network_1",
+      "title": "AND Series",
+      "comment": "Two contacts in series (AND logic)",
+      "rungs": [
+        {
+          "id": "rung_1",
+          "elements": [
+            {
+              "type": "contact",
+              "contact_type": "NO",
+              "operand": "contact_a"
+            },
+            {
+              "type": "contact",
+              "contact_type": "NO",
+              "operand": "contact_b"
+            },
+            {
+              "type": "coil",
+              "coil_type": "output",
+              "operand": "output"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

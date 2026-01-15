@@ -1,0 +1,27 @@
+{
+  "version": "1.0",
+  "networks": [
+    {
+      "id": "network_1",
+      "title": "Simple Contact",
+      "comment": "Directly assign start_button to motor_output",
+      "rungs": [
+        {
+          "id": "rung_1",
+          "elements": [
+            {
+              "type": "contact",
+              "contact_type": "NO",
+              "operand": "start_button"
+            },
+            {
+              "type": "coil",
+              "coil_type": "output",
+              "operand": "motor_output"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

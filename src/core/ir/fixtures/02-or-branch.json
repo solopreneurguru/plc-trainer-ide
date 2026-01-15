@@ -1,0 +1,52 @@
+{
+  "version": "1.0",
+  "organization_blocks": [
+    {
+      "id": "OB1",
+      "name": "Main",
+      "type": "cyclic",
+      "networks": [
+        {
+          "id": "network_1",
+          "title": "OR Branch (Parallel Contacts)",
+          "comment": "motor_output is ON when either start_button OR seal_contact is true",
+          "statements": [
+            {
+              "type": "assignment",
+              "id": "stmt_1",
+              "target": {
+                "tag": "motor_output"
+              },
+              "expression": {
+                "expr_type": "binary",
+                "operator": "OR",
+                "left": {
+                  "expr_type": "operand",
+                  "operand": {
+                    "tag": "start_button"
+                  }
+                },
+                "right": {
+                  "expr_type": "operand",
+                  "operand": {
+                    "tag": "seal_contact"
+                  }
+                }
+              },
+              "layout_hints": {
+                "language": "LAD",
+                "lad": {
+                  "rung_number": 1,
+                  "is_branch_start": true,
+                  "is_branch_end": true
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "functions": [],
+  "function_blocks": []
+}

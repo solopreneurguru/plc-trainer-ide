@@ -1,0 +1,50 @@
+{
+  "version": "1.0",
+  "organization_blocks": [
+    {
+      "id": "OB1",
+      "name": "Main",
+      "type": "cyclic",
+      "networks": [
+        {
+          "id": "network_1",
+          "title": "AND Series (Series Contacts)",
+          "comment": "output is ON only when both contact_a AND contact_b are true",
+          "statements": [
+            {
+              "type": "assignment",
+              "id": "stmt_1",
+              "target": {
+                "tag": "output"
+              },
+              "expression": {
+                "expr_type": "binary",
+                "operator": "AND",
+                "left": {
+                  "expr_type": "operand",
+                  "operand": {
+                    "tag": "contact_a"
+                  }
+                },
+                "right": {
+                  "expr_type": "operand",
+                  "operand": {
+                    "tag": "contact_b"
+                  }
+                }
+              },
+              "layout_hints": {
+                "language": "LAD",
+                "lad": {
+                  "rung_number": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "functions": [],
+  "function_blocks": []
+}

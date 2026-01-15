@@ -1,0 +1,41 @@
+{
+  "version": "1.0",
+  "networks": [
+    {
+      "id": "network_1",
+      "title": "OR Branch",
+      "comment": "Two contacts in parallel (OR logic)",
+      "rungs": [
+        {
+          "id": "rung_1",
+          "elements": [
+            {
+              "type": "branch",
+              "branches": [
+                [
+                  {
+                    "type": "contact",
+                    "contact_type": "NO",
+                    "operand": "start_button"
+                  }
+                ],
+                [
+                  {
+                    "type": "contact",
+                    "contact_type": "NO",
+                    "operand": "seal_contact"
+                  }
+                ]
+              ]
+            },
+            {
+              "type": "coil",
+              "coil_type": "output",
+              "operand": "motor_output"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

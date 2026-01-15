@@ -1,0 +1,63 @@
+{
+  "version": "1.0",
+  "networks": [
+    {
+      "id": "network_1",
+      "title": "Start/Stop with Seal-In",
+      "comment": "Classic start/stop circuit with seal-in contact",
+      "rungs": [
+        {
+          "id": "rung_1",
+          "comment": "Start/Seal rung",
+          "elements": [
+            {
+              "type": "branch",
+              "branches": [
+                [
+                  {
+                    "type": "contact",
+                    "contact_type": "NO",
+                    "operand": "start_button"
+                  }
+                ],
+                [
+                  {
+                    "type": "contact",
+                    "contact_type": "NO",
+                    "operand": "motor_output"
+                  }
+                ]
+              ]
+            },
+            {
+              "type": "coil",
+              "coil_type": "output",
+              "operand": "motor_output"
+            }
+          ]
+        },
+        {
+          "id": "rung_2",
+          "comment": "Stop rung (applies stop condition)",
+          "elements": [
+            {
+              "type": "contact",
+              "contact_type": "NO",
+              "operand": "motor_output"
+            },
+            {
+              "type": "contact",
+              "contact_type": "NC",
+              "operand": "stop_button"
+            },
+            {
+              "type": "coil",
+              "coil_type": "output",
+              "operand": "motor_output"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

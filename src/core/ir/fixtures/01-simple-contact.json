@@ -1,0 +1,40 @@
+{
+  "version": "1.0",
+  "organization_blocks": [
+    {
+      "id": "OB1",
+      "name": "Main",
+      "type": "cyclic",
+      "networks": [
+        {
+          "id": "network_1",
+          "title": "Simple Contact to Coil",
+          "comment": "When start_button is pressed, motor_output turns ON",
+          "statements": [
+            {
+              "type": "assignment",
+              "id": "stmt_1",
+              "target": {
+                "tag": "motor_output"
+              },
+              "expression": {
+                "expr_type": "operand",
+                "operand": {
+                  "tag": "start_button"
+                }
+              },
+              "layout_hints": {
+                "language": "LAD",
+                "lad": {
+                  "rung_number": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "functions": [],
+  "function_blocks": []
+}
