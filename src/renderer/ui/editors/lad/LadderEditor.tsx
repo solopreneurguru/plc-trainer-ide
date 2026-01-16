@@ -25,6 +25,8 @@ import {
   createLiteralOperand,
   createFunctionBlock,
   createComparison,
+  createBranch,
+  createWire,
   ContactType,
   CoilType,
   FunctionBlockType,
@@ -316,6 +318,46 @@ function LadderEditor({ program, onProgramChange, selectedInstruction }: LadderE
   };
 
   /**
+   * Add a parallel branch below an element at given position
+   * Creates: branch start, vertical wire, branch end structure
+   */
+  const handleAddBranch = (rungIndex: number, position: GridPosition) => {
+    const rung = network.rungs[rungIndex];
+
+    // Create branch structure:
+    // Row 0: branch start marker
+    // Row 1: vertical wire (branch path)
+    // Row 2: branch end marker (connects back)
+
+    const branchElements: LadderElement[] = [
+      createBranch(generateElementId('branch'), 'start', { row: position.row, col: position.col }, 2),
+      createWire(generateElementId('wire'), 'vertical', { row: position.row + 1, col: position.col }, 1),
+      createBranch(generateElementId('branch'), 'end', { row: position.row + 2, col: position.col }),
+    ];
+
+    const updatedRung: LadderRung = {
+      ...rung,
+      elements: [...rung.elements, ...branchElements],
+      gridSize: {
+        rows: Math.max(rung.gridSize.rows, position.row + 3),
+        cols: rung.gridSize.cols,
+      },
+    };
+
+    const updatedNetwork: LadderNetwork = {
+      ...network,
+      rungs: network.rungs.map((r, i) => (i === rungIndex ? updatedRung : r)),
+    };
+
+    const updatedProgram: LadderProgramFull = {
+      ...program,
+      networks: program.networks.map((n, i) => (i === selectedNetwork ? updatedNetwork : n)),
+    };
+
+    onProgramChange?.(updatedProgram);
+  };
+
+  /**
    * Render a single grid cell
    */
   const renderCell = (rungIndex: number, row: number, col: number) => {
@@ -409,6 +451,32 @@ function LadderEditor({ program, onProgramChange, selectedInstruction }: LadderE
         );
       }
 
+      case 'branch': {
+        // Branch markers (start/end of parallel paths)
+        const isBranchStart = element.branchType === 'start';
+        return (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-2xl text-blue-600 font-bold">
+              {isBranchStart ? '┬' : '┴'}
+            </div>
+          </div>
+        );
+      }
+
+      case 'wire': {
+        // Horizontal or vertical wires connecting branches
+        const isVertical = element.wireType === 'vertical';
+        return (
+          <div className="flex items-center justify-center h-full">
+            {isVertical ? (
+              <div className="w-1 h-full bg-blue-600" />
+            ) : (
+              <div className="h-1 w-full bg-blue-600" />
+            )}
+          </div>
+        );
+      }
+
       default:
         return <div className="text-xs text-gray-400">?</div>;
     }
@@ -434,16 +502,33 @@ function LadderEditor({ program, onProgramChange, selectedInstruction }: LadderE
             <span className="text-sm font-semibold text-gray-700">Rung {rungIndex + 1}</span>
             {rung.comment && <span className="text-xs text-gray-500">{rung.comment}</span>}
           </div>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDeleteRung(rungIndex);
-            }}
-            className="text-xs text-red-500 hover:text-red-700 font-semibold px-2 py-1 rounded hover:bg-red-50"
-            title="Delete rung"
-          >
-            Delete
-          </button>
+          <div className="flex gap-2">
+            {/* Add Branch button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                const colInput = prompt('Enter column position for branch (0-9):', '0');
+                if (colInput !== null) {
+                  const col = Math.max(0, Math.min(9, parseInt(colInput) || 0));
+                  handleAddBranch(rungIndex, { row: 0, col });
+                }
+              }}
+              className="text-xs text-blue-500 hover:text-blue-700 font-semibold px-2 py-1 rounded hover:bg-blue-50"
+              title="Add parallel branch"
+            >
+              + Branch
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteRung(rungIndex);
+              }}
+              className="text-xs text-red-500 hover:text-red-700 font-semibold px-2 py-1 rounded hover:bg-red-50"
+              title="Delete rung"
+            >
+              Delete
+            </button>
+          </div>
         </div>
 
         {/* Ladder Grid */}

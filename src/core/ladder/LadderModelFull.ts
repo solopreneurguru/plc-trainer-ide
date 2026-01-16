@@ -336,6 +336,42 @@ export function createComparison(
 }
 
 /**
+ * Create a branch element
+ */
+export function createBranch(
+  id: string,
+  branchType: 'start' | 'end',
+  position: GridPosition,
+  branchCount?: number
+): LadderBranch {
+  return {
+    elementType: 'branch',
+    id,
+    branchType,
+    position,
+    branchCount,
+  };
+}
+
+/**
+ * Create a wire element
+ */
+export function createWire(
+  id: string,
+  wireType: 'horizontal' | 'vertical',
+  position: GridPosition,
+  length: number
+): LadderWire {
+  return {
+    elementType: 'wire',
+    id,
+    wireType,
+    position,
+    length,
+  };
+}
+
+/**
  * Create an empty rung
  */
 export function createEmptyRung(id: string): LadderRung {

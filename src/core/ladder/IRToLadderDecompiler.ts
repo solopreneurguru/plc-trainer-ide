@@ -41,6 +41,8 @@ import {
   createEmptyRung,
   generateElementId,
   ComparisonType,
+  createBranch,
+  createWire,
 } from './LadderModelFull';
 
 // ============================================================================
@@ -308,10 +310,58 @@ export class IRToLadderDecompiler {
       elements.push(...leftElements, ...rightElements);
     } else if (expr.operator === 'OR') {
       // OR → Parallel contacts (branches)
-      // TODO: Implement branch logic
-      // For now, just decompile left side
+      const branchStartCol = this.currentCol;
+      const branchStartRow = this.currentRow;
+
+      // Create branch start marker
+      const branchStart = createBranch(
+        generateElementId('branch'),
+        'start',
+        { row: branchStartRow, col: branchStartCol },
+        2 // 2 parallel paths
+      );
+      elements.push(branchStart);
+      this.currentCol++;
+
+      // Decompile left branch (top path, row 0)
+      const leftStartCol = this.currentCol;
       const leftElements = this.decompileExpression(expr.left);
       elements.push(...leftElements);
+      const leftEndCol = this.currentCol;
+
+      // Create vertical wire for right branch connection
+      const wire = createWire(
+        generateElementId('wire'),
+        'vertical',
+        { row: branchStartRow + 1, col: branchStartCol },
+        1
+      );
+      elements.push(wire);
+
+      // Decompile right branch (bottom path, row 1)
+      const savedRow = this.currentRow;
+      this.currentRow = branchStartRow + 1;
+      this.currentCol = leftStartCol; // Start at same column as left branch
+      const rightElements = this.decompileExpression(expr.right);
+      elements.push(...rightElements);
+      const rightEndCol = this.currentCol;
+
+      // Use the longer branch to determine end position
+      const branchEndCol = Math.max(leftEndCol, rightEndCol);
+      this.currentCol = branchEndCol;
+      this.currentRow = savedRow;
+
+      // Create branch end marker
+      const branchEnd = createBranch(
+        generateElementId('branch'),
+        'end',
+        { row: branchStartRow, col: branchEndCol }
+      );
+      elements.push(branchEnd);
+      this.currentCol++;
+
+      // Update currentRow to accommodate the parallel path
+      this.currentRow = Math.max(this.currentRow, branchStartRow + 2);
     }
 
     return elements;
