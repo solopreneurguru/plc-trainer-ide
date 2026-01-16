@@ -1,0 +1,87 @@
+{
+  "version": "1.0",
+  "organization_blocks": [
+    {
+      "id": "OB1",
+      "name": "Main",
+      "type": "cyclic",
+      "networks": [
+        {
+          "id": "Network_1",
+          "title": "Network 1: Blinking LED using TON",
+          "comment": "Creates a 1-second on, 1-second off blinking pattern",
+          "statements": [
+            {
+              "type": "call",
+              "id": "stmt_1",
+              "function_name": "TON",
+              "instance": { "tag": "BlinkTimer" },
+              "inputs": {
+                "IN": {
+                  "expr_type": "operand",
+                  "operand": { "tag": "enable_blink" }
+                },
+                "PT": {
+                  "expr_type": "literal",
+                  "value": 1000,
+                  "data_type": "INT"
+                }
+              },
+              "outputs": {
+                "Q": { "tag": "timer_done" },
+                "ET": { "tag": "blink_elapsed" }
+              }
+            },
+            {
+              "type": "assignment",
+              "id": "stmt_2",
+              "target": { "tag": "led_output" },
+              "expression": {
+                "expr_type": "binary",
+                "operator": "AND",
+                "left": {
+                  "expr_type": "operand",
+                  "operand": { "tag": "enable_blink" }
+                },
+                "right": {
+                  "expr_type": "unary",
+                  "operator": "NOT",
+                  "operand": {
+                    "expr_type": "operand",
+                    "operand": { "tag": "timer_done" }
+                  }
+                }
+              }
+            },
+            {
+              "type": "assignment",
+              "id": "stmt_3",
+              "target": { "tag": "enable_blink" },
+              "expression": {
+                "expr_type": "binary",
+                "operator": "XOR",
+                "left": {
+                  "expr_type": "operand",
+                  "operand": { "tag": "enable_blink" }
+                },
+                "right": {
+                  "expr_type": "operand",
+                  "operand": { "tag": "timer_done" }
+                }
+              },
+              "layout_hints": {
+                "language": "LAD",
+                "lad": {
+                  "rung_number": 3,
+                  "comment": "Toggle enable_blink when timer completes"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "functions": [],
+  "function_blocks": []
+}
