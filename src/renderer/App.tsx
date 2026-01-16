@@ -8,6 +8,7 @@ import Toolbar from './ui/layout/Toolbar';
 import LadderDemo from './ui/editors/lad/LadderDemo';
 import TagTable from './ui/tags/TagTable';
 import WatchTable from './ui/tags/WatchTable';
+import InstructionPalette from './ui/editors/InstructionPalette';
 import { createDefaultLadderProgram } from '../core/ladder/LadderModel';
 import { TagDefinition, createTag } from '../core/tags/TagDefinition';
 
@@ -17,7 +18,7 @@ interface WatchData {
   tagValues: Record<string, any>;
 }
 
-type ViewTab = 'ladder' | 'tags' | 'watch';
+type ViewTab = 'ladder' | 'tags' | 'watch' | 'palette';
 
 function App() {
   const [runtimeStatus, setRuntimeStatus] = useState<'running' | 'stopped'>('stopped');
@@ -163,6 +164,16 @@ function App() {
             >
               👁️ Watch Table
             </button>
+            <button
+              onClick={() => setActiveTab('palette')}
+              className={`px-4 py-2 rounded-t-lg font-semibold text-sm transition-colors ${
+                activeTab === 'palette'
+                  ? 'bg-white text-blue-600 border-t border-x border-gray-300'
+                  : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+              }`}
+            >
+              🧰 Instructions
+            </button>
           </div>
 
           {/* Tab Content */}
@@ -222,6 +233,12 @@ function App() {
                   scanNumber={watchData.scanNumber}
                   scanDuration={watchData.scanDuration}
                 />
+              </div>
+            )}
+
+            {activeTab === 'palette' && (
+              <div className="h-full mt-4">
+                <InstructionPalette />
               </div>
             )}
           </div>
