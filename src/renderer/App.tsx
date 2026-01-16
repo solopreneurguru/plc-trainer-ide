@@ -6,10 +6,12 @@ import { useState, useEffect } from 'react';
 import IOPanel from './ui/io/IOPanel';
 import Toolbar from './ui/layout/Toolbar';
 import LadderDemo from './ui/editors/lad/LadderDemo';
+import LadderEditor from './ui/editors/lad/LadderEditor';
 import TagTable from './ui/tags/TagTable';
 import WatchTable from './ui/tags/WatchTable';
 import InstructionPalette from './ui/editors/InstructionPalette';
 import { createDefaultLadderProgram } from '../core/ladder/LadderModel';
+import { createEmptyLadderProgram, LadderProgramFull } from '../core/ladder/LadderModelFull';
 import { TagDefinition, createTag } from '../core/tags/TagDefinition';
 
 interface WatchData {
@@ -18,7 +20,7 @@ interface WatchData {
   tagValues: Record<string, any>;
 }
 
-type ViewTab = 'ladder' | 'tags' | 'watch' | 'palette';
+type ViewTab = 'ladder' | 'editor' | 'tags' | 'watch' | 'palette';
 
 function App() {
   const [runtimeStatus, setRuntimeStatus] = useState<'running' | 'stopped'>('stopped');
@@ -33,6 +35,12 @@ function App() {
     createTag('stop_button', 'BOOL', '%I0.1', 'Stop button input'),
     createTag('motor_output', 'BOOL', '%Q0.0', 'Motor output'),
   ]);
+  const [editableLadderProgram, setEditableLadderProgram] = useState<LadderProgramFull>(
+    createEmptyLadderProgram()
+  );
+  const [selectedInstruction, setSelectedInstruction] = useState<{ id: string; name: string } | null>(
+    null
+  );
 
   // Ladder program for visualization
   const ladderProgram = createDefaultLadderProgram();
@@ -145,6 +153,16 @@ function App() {
               📊 Ladder Diagram
             </button>
             <button
+              onClick={() => setActiveTab('editor')}
+              className={`px-4 py-2 rounded-t-lg font-semibold text-sm transition-colors ${
+                activeTab === 'editor'
+                  ? 'bg-white text-blue-600 border-t border-x border-gray-300'
+                  : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+              }`}
+            >
+              ✏️ LAD Editor
+            </button>
+            <button
               onClick={() => setActiveTab('tags')}
               className={`px-4 py-2 rounded-t-lg font-semibold text-sm transition-colors ${
                 activeTab === 'tags'
@@ -219,6 +237,16 @@ function App() {
               </div>
             )}
 
+            {activeTab === 'editor' && (
+              <div className="h-full mt-4">
+                <LadderEditor
+                  program={editableLadderProgram}
+                  onProgramChange={setEditableLadderProgram}
+                  selectedInstruction={selectedInstruction}
+                />
+              </div>
+            )}
+
             {activeTab === 'tags' && (
               <div className="h-full mt-4">
                 <TagTable tags={tags} onTagsChange={setTags} />
@@ -238,7 +266,11 @@ function App() {
 
             {activeTab === 'palette' && (
               <div className="h-full mt-4">
-                <InstructionPalette />
+                <InstructionPalette
+                  onSelectInstruction={(inst) =>
+                    setSelectedInstruction({ id: inst.id, name: inst.name })
+                  }
+                />
               </div>
             )}
           </div>
