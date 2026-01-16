@@ -202,15 +202,20 @@ describe('IR Fixtures', () => {
       }
     }
 
-    // Network 2: Stop with NOT expression
+    // Network 2: Stop with AND and NOT expression (motor_output AND NOT stop_button)
     const network2 = program.organization_blocks[0].networks[1];
     expect(network2.statements).toHaveLength(1);
     const stmt2 = network2.statements[0];
     expect(stmt2.type).toBe('assignment');
     if (stmt2.type === 'assignment') {
-      expect(stmt2.expression.expr_type).toBe('unary');
-      if (stmt2.expression.expr_type === 'unary') {
-        expect(stmt2.expression.operator).toBe('NOT');
+      expect(stmt2.expression.expr_type).toBe('binary');
+      if (stmt2.expression.expr_type === 'binary') {
+        expect(stmt2.expression.operator).toBe('AND');
+        // Right side should have the NOT operator
+        expect(stmt2.expression.right.expr_type).toBe('unary');
+        if (stmt2.expression.right.expr_type === 'unary') {
+          expect(stmt2.expression.right.operator).toBe('NOT');
+        }
       }
     }
   });

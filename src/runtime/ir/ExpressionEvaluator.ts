@@ -74,12 +74,48 @@ export class ExpressionEvaluator {
       return false;
     }
 
-    // Handle edge detection (future enhancement)
+    // Handle edge detection
     if (operand.edge) {
-      throw new Error('Edge detection not yet implemented');
+      return this.evaluateEdge(tagId, operand.edge, value);
     }
 
     return value;
+  }
+
+  /**
+   * Evaluate edge detection on an operand
+   *
+   * Rising edge (P): Returns TRUE for one scan when signal transitions FALSE -> TRUE
+   * Falling edge (N): Returns TRUE for one scan when signal transitions TRUE -> FALSE
+   *
+   * Implementation:
+   * - Get current boolean state of the operand
+   * - Get previous state from edge memory
+   * - Detect transition
+   * - Update edge memory with current state for next scan
+   */
+  private evaluateEdge(tagId: string, edgeType: 'rising' | 'falling', currentValue: TagValue): boolean {
+    // Convert current value to boolean
+    const currentState = this.toBoolean(currentValue);
+
+    // Get previous state from edge memory
+    const previousState = this.tagStore.getEdgeMemory(tagId, edgeType);
+
+    // Detect edge
+    let edgeDetected = false;
+
+    if (edgeType === 'rising') {
+      // Rising edge: current TRUE and previous FALSE
+      edgeDetected = currentState && !previousState;
+    } else if (edgeType === 'falling') {
+      // Falling edge: current FALSE and previous TRUE
+      edgeDetected = !currentState && previousState;
+    }
+
+    // Update edge memory with current state for next scan
+    this.tagStore.setEdgeMemory(tagId, edgeType, currentState);
+
+    return edgeDetected;
   }
 
   /**

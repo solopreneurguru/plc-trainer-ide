@@ -17,6 +17,10 @@ export class TagStore {
   // Pending writes during scan execution (last write wins)
   private pending: Map<string, TagValue> = new Map();
 
+  // Edge memory: stores previous state for edge detection
+  // Key format: "tagId:rising" or "tagId:falling"
+  private edgeMemory: Map<string, boolean> = new Map();
+
   constructor() {
     // Initialize empty
   }
@@ -114,6 +118,25 @@ export class TagStore {
     this.tags.clear();
     this.snapshot.clear();
     this.pending.clear();
+    this.edgeMemory.clear();
+  }
+
+  /**
+   * Get previous edge state for edge detection
+   * Returns the stored previous state (for detecting transitions)
+   */
+  getEdgeMemory(tagId: string, edgeType: 'rising' | 'falling'): boolean {
+    const key = `${tagId}:${edgeType}`;
+    return this.edgeMemory.get(key) || false;
+  }
+
+  /**
+   * Update edge memory with current state
+   * Called after edge detection to store current state for next scan
+   */
+  setEdgeMemory(tagId: string, edgeType: 'rising' | 'falling', state: boolean): void {
+    const key = `${tagId}:${edgeType}`;
+    this.edgeMemory.set(key, state);
   }
 
   /**

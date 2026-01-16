@@ -1,0 +1,107 @@
+{
+  "version": "1.0",
+  "organization_blocks": [
+    {
+      "id": "OB1",
+      "name": "Main",
+      "type": "cyclic",
+      "networks": [
+        {
+          "id": "Network_1",
+          "title": "Network 1: Button Counter with Rising Edge Detection",
+          "comment": "Increments counter each time button is pressed (rising edge)",
+          "statements": [
+            {
+              "type": "if",
+              "id": "stmt_1",
+              "condition": {
+                "expr_type": "operand",
+                "operand": {
+                  "tag": "push_button",
+                  "edge": "rising"
+                }
+              },
+              "then_statements": [
+                {
+                  "type": "assignment",
+                  "id": "stmt_2",
+                  "target": { "tag": "button_count" },
+                  "expression": {
+                    "expr_type": "binary",
+                    "operator": "ADD",
+                    "left": {
+                      "expr_type": "operand",
+                      "operand": { "tag": "button_count" }
+                    },
+                    "right": {
+                      "expr_type": "literal",
+                      "value": 1,
+                      "data_type": "INT"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "Network_2",
+          "title": "Network 2: Reset on Falling Edge",
+          "comment": "Resets counter when reset button is released (falling edge)",
+          "statements": [
+            {
+              "type": "if",
+              "id": "stmt_3",
+              "condition": {
+                "expr_type": "operand",
+                "operand": {
+                  "tag": "reset_button",
+                  "edge": "falling"
+                }
+              },
+              "then_statements": [
+                {
+                  "type": "assignment",
+                  "id": "stmt_4",
+                  "target": { "tag": "button_count" },
+                  "expression": {
+                    "expr_type": "literal",
+                    "value": 0,
+                    "data_type": "INT"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "Network_3",
+          "title": "Network 3: Status LED",
+          "comment": "Turn on LED if count is greater than 0",
+          "statements": [
+            {
+              "type": "assignment",
+              "id": "stmt_5",
+              "target": { "tag": "status_led" },
+              "expression": {
+                "expr_type": "binary",
+                "operator": "GT",
+                "left": {
+                  "expr_type": "operand",
+                  "operand": { "tag": "button_count" }
+                },
+                "right": {
+                  "expr_type": "literal",
+                  "value": 0,
+                  "data_type": "INT"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "functions": [],
+  "function_blocks": []
+}
