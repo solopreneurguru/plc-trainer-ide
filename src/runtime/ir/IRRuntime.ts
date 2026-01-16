@@ -57,13 +57,14 @@ export class IRRuntime {
   /**
    * Execute one scan cycle
    * Returns scan result with tag values
+   * @param currentTime - Optional timestamp for testing (defaults to Date.now())
    */
-  executeScan(): ScanResult {
+  executeScan(currentTime?: number): ScanResult {
     if (!this.program) {
       throw new Error('No program loaded');
     }
 
-    const startTime = Date.now();
+    const startTime = currentTime !== undefined ? currentTime : Date.now();
     this.scanNumber++;
 
     // ===== SCAN PHASE 1: SNAPSHOT TAGS =====
@@ -76,6 +77,9 @@ export class IRRuntime {
     this.tagStore.clearPending();
 
     // ===== SCAN PHASE 3: EXECUTE PROGRAM =====
+    // Set current time for timer execution
+    this.statementExecutor.setCurrentTime(startTime);
+
     // Execute all networks in OB1 (cyclic execution)
     const ob1 = this.program.organization_blocks.find((ob) => ob.type === 'cyclic');
     if (ob1) {

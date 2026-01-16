@@ -5,15 +5,25 @@
  * Writes results to pending buffer (commits at end of scan).
  */
 
-import { Statement, Operand } from '../../core/ir/types';
+import { Statement, Operand, TimerInstance, CallStatement } from '../../core/ir/types';
 import { TagStore, TagValue } from './TagStore';
 import { ExpressionEvaluator } from './ExpressionEvaluator';
+import { executeTON, executeTOF, executeTP } from './instructions/timers';
 
 export class StatementExecutor {
   private expressionEvaluator: ExpressionEvaluator;
+  private currentTime: number = Date.now();
 
   constructor(private tagStore: TagStore) {
     this.expressionEvaluator = new ExpressionEvaluator(tagStore);
+  }
+
+  /**
+   * Set the current timestamp for timer execution
+   * Should be called at the start of each scan cycle
+   */
+  setCurrentTime(time: number): void {
+    this.currentTime = time;
   }
 
   /**
@@ -61,10 +71,74 @@ export class StatementExecutor {
 
   /**
    * Execute call statement (function block calls)
-   * Not yet implemented - placeholder for future
+   * Supports: TON, TOF, TP timers
    */
-  private executeCall(statement: any): void {
-    throw new Error(`Function calls not yet implemented: ${statement.function_name}`);
+  private executeCall(statement: CallStatement): void {
+    const { function_name, instance, inputs, outputs } = statement;
+
+    // Get instance tag ID (where timer state is stored)
+    if (!instance) {
+      throw new Error(`Call statement ${function_name} requires an instance operand`);
+    }
+    const instanceTagId = this.resolveOperandToTagId(instance);
+
+    // Get current timer instance (or undefined if not initialized)
+    const currentInstance = this.tagStore.readFromPendingOrSnapshot(instanceTagId) as
+      | TimerInstance
+      | undefined;
+
+    // Execute timer based on function name
+    let updatedInstance: TimerInstance | undefined;
+
+    switch (function_name) {
+      case 'TON': {
+        // Evaluate inputs
+        const IN = this.toBoolean(this.expressionEvaluator.evaluate(inputs['IN']));
+        const PT = this.toNumber(this.expressionEvaluator.evaluate(inputs['PT']));
+
+        // Execute timer
+        updatedInstance = executeTON(currentInstance, IN, PT, this.currentTime);
+        break;
+      }
+
+      case 'TOF': {
+        // Evaluate inputs
+        const IN = this.toBoolean(this.expressionEvaluator.evaluate(inputs['IN']));
+        const PT = this.toNumber(this.expressionEvaluator.evaluate(inputs['PT']));
+
+        // Execute timer
+        updatedInstance = executeTOF(currentInstance, IN, PT, this.currentTime);
+        break;
+      }
+
+      case 'TP': {
+        // Evaluate inputs
+        const IN = this.toBoolean(this.expressionEvaluator.evaluate(inputs['IN']));
+        const PT = this.toNumber(this.expressionEvaluator.evaluate(inputs['PT']));
+
+        // Execute timer
+        updatedInstance = executeTP(currentInstance, IN, PT, this.currentTime);
+        break;
+      }
+
+      default:
+        throw new Error(`Unknown function: ${function_name}`);
+    }
+
+    // Write updated instance back to pending
+    if (updatedInstance) {
+      this.tagStore.writeToPending(instanceTagId, updatedInstance);
+    }
+
+    // Write outputs to their respective tags
+    if (outputs['Q']) {
+      const outputTagId = this.resolveOperandToTagId(outputs['Q']);
+      this.tagStore.writeToPending(outputTagId, updatedInstance?.Q || false);
+    }
+    if (outputs['ET']) {
+      const outputTagId = this.resolveOperandToTagId(outputs['ET']);
+      this.tagStore.writeToPending(outputTagId, updatedInstance?.ET || 0);
+    }
   }
 
   /**
@@ -131,5 +205,22 @@ export class StatementExecutor {
       return value !== 0;
     }
     return false;
+  }
+
+  /**
+   * Convert value to number
+   */
+  private toNumber(value: TagValue): number {
+    if (typeof value === 'number') {
+      return value;
+    }
+    if (typeof value === 'boolean') {
+      return value ? 1 : 0;
+    }
+    if (typeof value === 'string') {
+      const parsed = parseFloat(value);
+      return isNaN(parsed) ? 0 : parsed;
+    }
+    return 0;
   }
 }
