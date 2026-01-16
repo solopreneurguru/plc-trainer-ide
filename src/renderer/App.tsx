@@ -7,6 +7,7 @@ import IOPanel from './ui/io/IOPanel';
 import Toolbar from './ui/layout/Toolbar';
 import LadderDemo from './ui/editors/lad/LadderDemo';
 import TagTable from './ui/tags/TagTable';
+import WatchTable from './ui/tags/WatchTable';
 import { createDefaultLadderProgram } from '../core/ladder/LadderModel';
 import { TagDefinition, createTag } from '../core/tags/TagDefinition';
 
@@ -16,7 +17,7 @@ interface WatchData {
   tagValues: Record<string, any>;
 }
 
-type ViewTab = 'ladder' | 'tags';
+type ViewTab = 'ladder' | 'tags' | 'watch';
 
 function App() {
   const [runtimeStatus, setRuntimeStatus] = useState<'running' | 'stopped'>('stopped');
@@ -152,6 +153,16 @@ function App() {
             >
               🏷️ Tag Table
             </button>
+            <button
+              onClick={() => setActiveTab('watch')}
+              className={`px-4 py-2 rounded-t-lg font-semibold text-sm transition-colors ${
+                activeTab === 'watch'
+                  ? 'bg-white text-blue-600 border-t border-x border-gray-300'
+                  : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+              }`}
+            >
+              👁️ Watch Table
+            </button>
           </div>
 
           {/* Tab Content */}
@@ -200,6 +211,17 @@ function App() {
             {activeTab === 'tags' && (
               <div className="h-full mt-4">
                 <TagTable tags={tags} onTagsChange={setTags} />
+              </div>
+            )}
+
+            {activeTab === 'watch' && (
+              <div className="h-full mt-4">
+                <WatchTable
+                  tags={tags}
+                  tagValues={watchData.tagValues}
+                  scanNumber={watchData.scanNumber}
+                  scanDuration={watchData.scanDuration}
+                />
               </div>
             )}
           </div>
