@@ -1,0 +1,90 @@
+{
+  "version": "1.0",
+  "organization_blocks": [
+    {
+      "id": "OB1",
+      "name": "Main",
+      "type": "cyclic",
+      "networks": [
+        {
+          "id": "Network_1",
+          "title": "Network 1: Motor Control with SR Latch",
+          "comment": "Start button sets motor ON, stop button resets motor OFF. Start has priority (SR latch).",
+          "statements": [
+            {
+              "type": "call",
+              "id": "stmt_1",
+              "function_name": "SR",
+              "instance": { "tag": "MotorLatch" },
+              "inputs": {
+                "S": {
+                  "expr_type": "operand",
+                  "operand": { "tag": "start_button" }
+                },
+                "R": {
+                  "expr_type": "operand",
+                  "operand": { "tag": "stop_button" }
+                }
+              },
+              "outputs": {
+                "Q": { "tag": "motor_running" }
+              }
+            }
+          ]
+        },
+        {
+          "id": "Network_2",
+          "title": "Network 2: Emergency Stop with RS Latch",
+          "comment": "Enable switch starts system, emergency stop shuts down. Emergency stop has priority (RS latch).",
+          "statements": [
+            {
+              "type": "call",
+              "id": "stmt_2",
+              "function_name": "RS",
+              "instance": { "tag": "SystemLatch" },
+              "inputs": {
+                "S": {
+                  "expr_type": "operand",
+                  "operand": { "tag": "enable_switch" }
+                },
+                "R": {
+                  "expr_type": "operand",
+                  "operand": { "tag": "emergency_stop" }
+                }
+              },
+              "outputs": {
+                "Q": { "tag": "system_enabled" }
+              }
+            }
+          ]
+        },
+        {
+          "id": "Network_3",
+          "title": "Network 3: Final Motor Output",
+          "comment": "Motor only runs if both motor latch is ON AND system is enabled",
+          "statements": [
+            {
+              "type": "assignment",
+              "id": "stmt_3",
+              "target": { "tag": "motor_output" },
+              "expression": {
+                "expr_type": "binary",
+                "operator": "AND",
+                "left": {
+                  "expr_type": "operand",
+                  "operand": { "tag": "motor_running" }
+                },
+                "right": {
+                  "expr_type": "operand",
+                  "operand": { "tag": "system_enabled" }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "functions": [],
+  "function_blocks": []
+}

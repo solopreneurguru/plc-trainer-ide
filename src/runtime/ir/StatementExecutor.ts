@@ -5,11 +5,12 @@
  * Writes results to pending buffer (commits at end of scan).
  */
 
-import { Statement, Operand, TimerInstance, CounterInstance, CallStatement } from '../../core/ir/types';
+import { Statement, Operand, TimerInstance, CounterInstance, LatchInstance, CallStatement } from '../../core/ir/types';
 import { TagStore, TagValue } from './TagStore';
 import { ExpressionEvaluator } from './ExpressionEvaluator';
 import { executeTON, executeTOF, executeTP } from './instructions/timers';
 import { executeCTU, executeCTD, executeCTUD } from './instructions/counters';
+import { executeSR, executeRS } from './instructions/latches';
 
 export class StatementExecutor {
   private expressionEvaluator: ExpressionEvaluator;
@@ -83,14 +84,15 @@ export class StatementExecutor {
     }
     const instanceTagId = this.resolveOperandToTagId(instance);
 
-    // Get current instance (timer or counter)
+    // Get current instance (timer, counter, or latch)
     const currentInstance = this.tagStore.readFromPendingOrSnapshot(instanceTagId) as
       | TimerInstance
       | CounterInstance
+      | LatchInstance
       | undefined;
 
     // Execute function based on function name
-    let updatedInstance: TimerInstance | CounterInstance | undefined;
+    let updatedInstance: TimerInstance | CounterInstance | LatchInstance | undefined;
 
     switch (function_name) {
       case 'TON': {
@@ -155,6 +157,26 @@ export class StatementExecutor {
 
         // Execute counter
         updatedInstance = executeCTUD(currentInstance as CounterInstance, CU, CD, R, LD, PV);
+        break;
+      }
+
+      case 'SR': {
+        // Evaluate inputs
+        const S = this.toBoolean(this.expressionEvaluator.evaluate(inputs['S']));
+        const R = this.toBoolean(this.expressionEvaluator.evaluate(inputs['R']));
+
+        // Execute latch
+        updatedInstance = executeSR(currentInstance as LatchInstance, S, R);
+        break;
+      }
+
+      case 'RS': {
+        // Evaluate inputs
+        const S = this.toBoolean(this.expressionEvaluator.evaluate(inputs['S']));
+        const R = this.toBoolean(this.expressionEvaluator.evaluate(inputs['R']));
+
+        // Execute latch
+        updatedInstance = executeRS(currentInstance as LatchInstance, S, R);
         break;
       }
 

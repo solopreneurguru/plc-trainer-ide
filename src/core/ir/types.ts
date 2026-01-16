@@ -350,6 +350,13 @@ export interface CounterInstance {
   _prev_CD?: boolean;
 }
 
+export interface LatchInstance {
+  type: 'SR' | 'RS';
+  S: boolean; // Set input
+  R: boolean; // Reset input
+  Q: boolean; // Output
+}
+
 // ============================================================================
 // Utility Functions
 // ============================================================================
