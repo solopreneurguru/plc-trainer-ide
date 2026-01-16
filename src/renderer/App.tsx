@@ -7,6 +7,7 @@ import IOPanel from './ui/io/IOPanel';
 import Toolbar from './ui/layout/Toolbar';
 import LadderDemo from './ui/editors/lad/LadderDemo';
 import LadderEditor from './ui/editors/lad/LadderEditor';
+import LADWorkspace from './ui/workspace/LADWorkspace';
 import TagTable from './ui/tags/TagTable';
 import WatchTable from './ui/tags/WatchTable';
 import InstructionPalette from './ui/editors/InstructionPalette';
@@ -20,7 +21,7 @@ interface WatchData {
   tagValues: Record<string, any>;
 }
 
-type ViewTab = 'ladder' | 'editor' | 'tags' | 'watch' | 'palette';
+type ViewTab = 'workspace' | 'ladder' | 'editor' | 'tags' | 'watch' | 'palette';
 
 function App() {
   const [runtimeStatus, setRuntimeStatus] = useState<'running' | 'stopped'>('stopped');
@@ -29,7 +30,7 @@ function App() {
     scanDuration: 0,
     tagValues: {},
   });
-  const [activeTab, setActiveTab] = useState<ViewTab>('ladder');
+  const [activeTab, setActiveTab] = useState<ViewTab>('workspace');
   const [tags, setTags] = useState<TagDefinition[]>([
     createTag('start_button', 'BOOL', '%I0.0', 'Start button input'),
     createTag('stop_button', 'BOOL', '%I0.1', 'Stop button input'),
@@ -143,6 +144,16 @@ function App() {
           {/* Tab Navigation */}
           <div className="flex gap-1 px-6 pt-4">
             <button
+              onClick={() => setActiveTab('workspace')}
+              className={`px-4 py-2 rounded-t-lg font-semibold text-sm transition-colors ${
+                activeTab === 'workspace'
+                  ? 'bg-white text-blue-600 border-t border-x border-gray-300'
+                  : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+              }`}
+            >
+              🏗️ Workspace (TIA Style)
+            </button>
+            <button
               onClick={() => setActiveTab('ladder')}
               className={`px-4 py-2 rounded-t-lg font-semibold text-sm transition-colors ${
                 activeTab === 'ladder'
@@ -196,6 +207,18 @@ function App() {
 
           {/* Tab Content */}
           <div className="flex-1 p-6 pt-0 overflow-auto">
+            {activeTab === 'workspace' && (
+              <div className="h-full mt-4">
+                <LADWorkspace
+                  program={editableLadderProgram}
+                  onProgramChange={setEditableLadderProgram}
+                  tags={tags}
+                  onTagsChange={setTags}
+                  watchData={watchData}
+                />
+              </div>
+            )}
+
             {activeTab === 'ladder' && (
               <div className="bg-white rounded-lg shadow-lg p-6 mt-4 h-full">
                 <div className="flex items-center justify-between mb-4">
