@@ -261,18 +261,47 @@ function LadderEditor({ program, onProgramChange, selectedInstruction }: LadderE
    */
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     e.dataTransfer.dropEffect = 'copy';
+    console.log('[DEBUG] handleDragOver:', {
+      types: Array.from(e.dataTransfer.types),
+    });
   };
 
   const handleDrop = (e: React.DragEvent, rungIndex: number, position: GridPosition) => {
     e.preventDefault();
+    e.stopPropagation();
+
+    console.log('[DEBUG] handleDrop:', {
+      rungIndex,
+      row: position.row,
+      col: position.col,
+      types: Array.from(e.dataTransfer.types),
+    });
 
     try {
-      const data = e.dataTransfer.getData('application/json');
+      // Try new standardized key first
+      let data = e.dataTransfer.getData('application/x-plc-instruction');
+
+      // Fallback to old key for backward compatibility
+      if (!data) {
+        console.warn('[DEBUG] Fallback to application/json key');
+        data = e.dataTransfer.getData('application/json');
+      }
+
+      if (!data) {
+        console.error('[DEBUG] No drag data found! Available types:', Array.from(e.dataTransfer.types));
+        return;
+      }
+
+      console.log('[DEBUG] Drag data:', data);
       const instruction = JSON.parse(data);
+      console.log('[DEBUG] Parsed instruction:', instruction);
+
       placeInstruction(instruction.id, rungIndex, position);
+      console.log('[DEBUG] placeInstruction called successfully');
     } catch (error) {
-      console.error('Failed to parse dropped instruction:', error);
+      console.error('[DEBUG] Failed to parse dropped instruction:', error);
     }
   };
 
@@ -322,7 +351,10 @@ function LadderEditor({ program, onProgramChange, selectedInstruction }: LadderE
    * Creates: branch start, vertical wire, branch end structure
    */
   const handleAddBranch = (rungIndex: number, position: GridPosition) => {
+    console.log('[DEBUG] ADD_BRANCH called:', { rungIndex, position });
+
     const rung = network.rungs[rungIndex];
+    console.log('[DEBUG] Current rung:', rung);
 
     // Create branch structure:
     // Row 0: branch start marker
@@ -335,6 +367,8 @@ function LadderEditor({ program, onProgramChange, selectedInstruction }: LadderE
       createBranch(generateElementId('branch'), 'end', { row: position.row + 2, col: position.col }),
     ];
 
+    console.log('[DEBUG] Created branch elements:', branchElements);
+
     const updatedRung: LadderRung = {
       ...rung,
       elements: [...rung.elements, ...branchElements],
@@ -343,6 +377,8 @@ function LadderEditor({ program, onProgramChange, selectedInstruction }: LadderE
         cols: rung.gridSize.cols,
       },
     };
+
+    console.log('[DEBUG] Updated rung:', updatedRung);
 
     const updatedNetwork: LadderNetwork = {
       ...network,
@@ -354,7 +390,9 @@ function LadderEditor({ program, onProgramChange, selectedInstruction }: LadderE
       networks: program.networks.map((n, i) => (i === selectedNetwork ? updatedNetwork : n)),
     };
 
+    console.log('[DEBUG] Calling onProgramChange with updated program');
     onProgramChange?.(updatedProgram);
+    console.log('[DEBUG] ADD_BRANCH completed successfully');
   };
 
   /**
@@ -386,8 +424,14 @@ function LadderEditor({ program, onProgramChange, selectedInstruction }: LadderE
         onClick={() => handleCellClick(rungIndex, { row, col })}
         onMouseEnter={() => setHoveredCell({ row, col })}
         onMouseLeave={() => setHoveredCell(null)}
-        onDragOver={handleDragOver}
-        onDrop={(e) => handleDrop(e, rungIndex, { row, col })}
+        onDragOver={(e) => {
+          console.log('[DEBUG] Cell onDragOver:', { rungIndex, row, col });
+          handleDragOver(e);
+        }}
+        onDrop={(e) => {
+          console.log('[DEBUG] Cell onDrop:', { rungIndex, row, col });
+          handleDrop(e, rungIndex, { row, col });
+        }}
       >
         {element && renderElement(element)}
       </div>
@@ -506,10 +550,13 @@ function LadderEditor({ program, onProgramChange, selectedInstruction }: LadderE
             {/* Add Branch button */}
             <button
               onClick={(e) => {
+                console.log('[DEBUG] + Branch button clicked for rung', rungIndex);
                 e.stopPropagation();
                 const colInput = prompt('Enter column position for branch (0-9):', '0');
+                console.log('[DEBUG] User entered column:', colInput);
                 if (colInput !== null) {
                   const col = Math.max(0, Math.min(9, parseInt(colInput) || 0));
+                  console.log('[DEBUG] Calling handleAddBranch with col:', col);
                   handleAddBranch(rungIndex, { row: 0, col });
                 }
               }}

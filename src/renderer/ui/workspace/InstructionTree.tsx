@@ -158,7 +158,13 @@ function InstructionTree({ onSelectInstruction }: InstructionTreeProps) {
   };
 
   const handleDragStart = (e: React.DragEvent, instruction: Instruction) => {
-    e.dataTransfer.setData('application/json', JSON.stringify(instruction));
+    const payload = JSON.stringify(instruction);
+    console.log('[DEBUG] InstructionTree dragStart:', { instruction, payload });
+
+    // Use standardized key for PLC instructions
+    e.dataTransfer.setData('application/x-plc-instruction', payload);
+    // Also set old key for backward compatibility
+    e.dataTransfer.setData('application/json', payload);
     e.dataTransfer.effectAllowed = 'copy';
   };
 
