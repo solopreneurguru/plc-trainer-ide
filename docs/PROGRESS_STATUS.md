@@ -15,12 +15,42 @@ We have successfully completed the foundational milestones (1-4) of the PLC Trai
 - ✅ Interactive I/O panel (7 inputs, 7 outputs)
 - ✅ Runtime controls (Start/Stop/Step/Reset)
 
-**Current State:** ~30% complete toward Phase 1 MVP
-**Next Focus:** Complete Phase 1 - Add timers, counters, drag-and-drop LAD editor, and full project management
+**Current State:** ~45% complete toward Phase 1 MVP
+**Next Focus:** Phase 1B - Essential UI Components (Tag Table, Watch Table, Instruction Palette)
 
 ---
 
 ## Completed Milestones
+
+### ✅ Milestone 5: Phase 1A - Core Instructions (Complete)
+**Status:** 100% Complete
+**Date Completed:** 2026-01-15
+
+**Deliverables:**
+- ✅ Timer Instructions (TON/TOF/TP) - 11 tests
+- ✅ Counter Instructions (CTU/CTD/CTUD) - 10 tests
+- ✅ Edge Detection (P/N) - 11 tests
+- ✅ Latch Instructions (SR/RS) - 19 tests
+- ✅ Total: 51 new tests, all passing
+- ✅ 3 demo fixtures (blink timer, edge counter, motor control)
+
+**Key Files:**
+- `src/runtime/ir/instructions/timers.ts` - Timer execution logic (224 lines)
+- `src/runtime/ir/instructions/counters.ts` - Counter execution logic (268 lines)
+- `src/runtime/ir/instructions/latches.ts` - Latch execution logic (126 lines)
+- `src/runtime/ir/ExpressionEvaluator.ts` - Edge detection integration
+- `src/runtime/ir/TagStore.ts` - Edge memory tracking
+- `src/runtime/ir/StatementExecutor.ts` - Instruction execution dispatcher
+
+**Technical Achievements:**
+- Edge detection with memory tracking across scan cycles
+- Rising edge (P) and falling edge (N) detection
+- Timer state management with millisecond precision
+- Counter overflow/underflow protection
+- Bistable latch behavior (SR/RS priority handling)
+- Comprehensive unit testing (88 total tests passing)
+
+---
 
 ### ✅ Milestone 1: IR Schema & Validation (Complete)
 **Status:** 100% Complete
@@ -162,7 +192,7 @@ We have successfully completed the foundational milestones (1-4) of the PLC Trai
 
 ## Phase 1 Progress: Core Runtime + LAD Editor + I/O
 
-**Overall Progress:** ~30% Complete
+**Overall Progress:** ~45% Complete
 
 ### ✅ Completed Tasks
 
@@ -179,6 +209,10 @@ We have successfully completed the foundational milestones (1-4) of the PLC Trai
 | 1.15 | LAD watch highlighting | ✅ Complete | Agent 4 (Watch) |
 | 1.16 | I/O Panel | ✅ Complete | UI Components |
 | 1.20 | Toolbar (partial) | ✅ Complete | UI Layout |
+| 1.1 | **Timers (TON/TOF/TP)** | ✅ Complete | Agent 2 |
+| 1.2 | **Counters (CTU/CTD/CTUD)** | ✅ Complete | Agent 2 |
+| 1.3 | **Latches (SR/RS)** | ✅ Complete | Agent 2 |
+| 1.4 | **Edge detection (P/N)** | ✅ Complete | Agent 2 |
 
 ### ⬜ Remaining Critical Tasks (Phase 1)
 
@@ -186,10 +220,6 @@ We have successfully completed the foundational milestones (1-4) of the PLC Trai
 
 | Task ID | Description | Estimated Time | Agent |
 |---------|-------------|----------------|-------|
-| 1.1 | **Timers (TON/TOF/TP)** | 10 hours | Agent 2 |
-| 1.2 | **Counters (CTU/CTD/CTUD)** | 8 hours | Agent 2 |
-| 1.3 | **Latches (SR/RS)** | 3 hours | Agent 2 |
-| 1.4 | **Edge detection (P/N)** | 3 hours | Agent 2 |
 | 1.7 | LAD data structures (full) | 2 hours | Agent 3 |
 | 1.9 | IR-to-LAD decompiler | 10 hours | Agent 3 |
 | 1.11 | LAD Editor component | 8 hours | Agent 3 |
@@ -201,7 +231,7 @@ We have successfully completed the foundational milestones (1-4) of the PLC Trai
 | 1.21 | Project Manager | 8 hours | Project Mgmt |
 | 1.22 | Zustand store | 10 hours | State Mgmt |
 
-**Subtotal:** ~106 hours remaining
+**Subtotal:** ~82 hours remaining
 
 #### Medium Priority (Should Have)
 
@@ -214,7 +244,7 @@ We have successfully completed the foundational milestones (1-4) of the PLC Trai
 
 **Subtotal:** ~27 hours
 
-**Total Phase 1 Remaining:** ~133 hours (~3-4 weeks)
+**Total Phase 1 Remaining:** ~109 hours (~3 weeks)
 
 ---
 
@@ -281,10 +311,11 @@ We have successfully completed the foundational milestones (1-4) of the PLC Trai
 |---------|---------------|---------------|--------|
 | Contacts (NO/NC) | ✓ | ✓ Visualization | ✅ Working |
 | Coils | ✓ | ✓ Visualization | ✅ Working |
-| Set/Reset | ✓ | Not implemented | ❌ Missing |
-| Timers (TON/TOF/TP) | ✓ | Not implemented | ❌ Missing |
-| Counters (CTU/CTD) | ✓ | Not implemented | ❌ Missing |
-| Edge detection (P/N) | ✓ | Not implemented | ❌ Missing |
+| Timers (TON/TOF/TP) | ✓ | ✓ Runtime Only | ✅ Working |
+| Counters (CTU/CTD/CTUD) | ✓ | ✓ Runtime Only | ✅ Working |
+| Edge detection (P/N) | ✓ | ✓ Runtime Only | ✅ Working |
+| Latches (SR/RS) | ✓ | ✓ Runtime Only | ✅ Working |
+| Set/Reset coils | ✓ | Not implemented | ❌ Missing |
 | Compare blocks | ✓ | Not implemented | ❌ Missing |
 | Math blocks | ✓ | Not implemented | ❌ Missing |
 
@@ -320,18 +351,18 @@ We have successfully completed the foundational milestones (1-4) of the PLC Trai
 
 ### Immediate Next Steps (Next 2 Weeks)
 
-**Priority 1: Complete Core Runtime Instructions**
+**Priority 1: Complete Core Runtime Instructions** ✅ COMPLETE
 1. ✅ Implement Timers (TON/TOF/TP) - 10 hours
 2. ✅ Implement Counters (CTU/CTD/CTUD) - 8 hours
 3. ✅ Implement Edge Detection - 3 hours
 4. ✅ Implement Latches (SR/RS) - 3 hours
 
-**Priority 2: Essential UI Components**
-5. ✅ Tag Table UI - 10 hours
-6. ✅ Watch Table UI - 10 hours
-7. ✅ Instruction Palette - 6 hours
+**Priority 2: Essential UI Components** ⬜ IN PROGRESS
+5. ⬜ Tag Table UI - 10 hours
+6. ⬜ Watch Table UI - 10 hours
+7. ⬜ Instruction Palette - 6 hours
 
-**Total:** ~50 hours (1-2 weeks)
+**Total:** ~50 hours (Phase 1A: ✅ 24 hours complete, Phase 1B: ⬜ 26 hours remaining)
 
 ### Medium Term (Weeks 3-6)
 
@@ -382,7 +413,12 @@ We have successfully completed the foundational milestones (1-4) of the PLC Trai
 ### Test Coverage
 - IR Runtime: 10/10 tests passing ✅
 - LAD Compiler: 8/8 tests passing ✅
-- Overall coverage: ~40% (target: 80%)
+- Timers: 11/11 tests passing ✅
+- Counters: 10/10 tests passing ✅
+- Edge Detection: 11/11 tests passing ✅
+- Latches: 19/19 tests passing ✅
+- **Total: 88/88 tests passing ✅**
+- Overall coverage: ~55% (target: 80%)
 
 ### Performance
 - Scan cycle: < 5ms (tested with seal-in circuit) ✅
@@ -428,12 +464,13 @@ We have successfully completed the foundational milestones (1-4) of the PLC Trai
 - Milestone 2: ~12 hours
 - Milestone 3: ~10 hours
 - Milestone 4: ~15 hours
-- **Total:** ~45 hours
+- Milestone 5 (Phase 1A): ~24 hours
+- **Total:** ~69 hours
 
 ### Estimated Remaining (MVP Phase 1)
-- ~133 hours remaining for Phase 1 completion
+- ~109 hours remaining for Phase 1 completion
 - ~165 hours for Phases 2-4
-- **Total to MVP:** ~298 hours (~7-8 weeks)
+- **Total to MVP:** ~274 hours (~6-7 weeks)
 
 ---
 
@@ -442,8 +479,8 @@ We have successfully completed the foundational milestones (1-4) of the PLC Trai
 ### Must Have (P0)
 - [x] IR runtime with proper scan cycle
 - [x] Basic LAD visualization
-- [ ] Timers (TON/TOF/TP) working accurately
-- [ ] Counters (CTU/CTD) working correctly
+- [x] Timers (TON/TOF/TP) working accurately ✅
+- [x] Counters (CTU/CTD/CTUD) working correctly ✅
 - [ ] LAD editor with drag-and-drop
 - [ ] Tag table for defining variables
 - [ ] Watch table for monitoring values
@@ -451,9 +488,9 @@ We have successfully completed the foundational milestones (1-4) of the PLC Trai
 - [ ] At least 3 working example lessons
 
 ### Should Have (P1)
-- [ ] Edge detection (P/N)
+- [x] Edge detection (P/N) ✅
+- [x] Latches (SR/RS) ✅
 - [ ] Set/Reset coils
-- [ ] Latches (SR/RS)
 - [ ] Compare blocks
 - [ ] Math blocks
 - [ ] Auto-save functionality
@@ -471,14 +508,14 @@ We have successfully completed the foundational milestones (1-4) of the PLC Trai
 ### Immediate (This Week)
 1. ✅ Update planning documents with progress
 2. ✅ Create clear roadmap for next sprint
-3. ⬜ Begin timer implementation (TON/TOF/TP)
-4. ⬜ Add timer tests
+3. ✅ Complete Phase 1A (all core instructions) ✅
+4. ⬜ Begin Phase 1B (Tag Table UI)
 
 ### This Sprint (Next 2 Weeks)
-1. Complete all core runtime instructions
-2. Implement Tag Table UI
-3. Implement Watch Table UI
-4. Add Instruction Palette
+1. ✅ Complete all core runtime instructions ✅
+2. ⬜ Implement Tag Table UI
+3. ⬜ Implement Watch Table UI
+4. ⬜ Add Instruction Palette
 
 ### Next Sprint (Weeks 3-4)
 1. Enhance LAD editor with drag-and-drop
@@ -499,16 +536,17 @@ We've built a solid foundation with a working runtime engine, basic LAD compiler
 - ✅ Clean separation of concerns (IR → Runtime → UI)
 
 **Next Focus:**
-Our immediate priority is completing the core instruction set (timers, counters, edge detection) and essential UI components (tag table, watch table, palette) to enable meaningful PLC programming education.
+Our immediate priority is building essential UI components (Tag Table, Watch Table, Instruction Palette) to enable users to define variables and monitor execution in real-time.
 
 **Timeline:**
-- Phase 1 MVP completion: ~6-8 weeks
-- Full MVP (with FBD and SCL): ~3-4 months
+- Phase 1B completion: ~2 weeks
+- Phase 1 MVP completion: ~6 weeks
+- Full MVP (with FBD and SCL): ~3 months
 
 The project is on track and the architecture is proving flexible and maintainable. We're ready to accelerate development with the foundation firmly in place.
 
 ---
 
-**Document Version:** 1.0
-**Last Updated:** 2026-01-15
-**Next Review:** 2026-01-22
+**Document Version:** 1.1
+**Last Updated:** 2026-01-15 (Phase 1A Complete)
+**Next Review:** 2026-01-29 (After Phase 1B)
