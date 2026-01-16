@@ -35,6 +35,8 @@ interface LadderEditorProps {
   program: LadderProgramFull;
   onProgramChange?: (program: LadderProgramFull) => void;
   selectedInstruction?: { id: string; name: string } | null;
+  onElementSelect?: (element: LadderElement | null) => void;
+  onElementChange?: (element: LadderElement) => void;
 }
 
 // Grid cell size in pixels
