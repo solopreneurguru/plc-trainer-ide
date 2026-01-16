@@ -238,11 +238,6 @@ export function executeCTUD(
  * Create a new counter instance
  */
 export function createCounterInstance(type: 'CTU' | 'CTD' | 'CTUD'): CounterInstance {
-  const base = {
-    PV: 0,
-    CV: 0,
-  };
-
   switch (type) {
     case 'CTU':
       return {

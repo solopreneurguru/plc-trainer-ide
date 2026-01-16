@@ -268,14 +268,14 @@ export const StatementSchema: z.ZodType<Statement> = z.lazy(() =>
 export interface Network {
   id: string;
   title: string;
-  comment: string;
+  comment?: string;
   statements: Statement[];
 }
 
 export const NetworkSchema: z.ZodType<Network> = z.object({
   id: z.string(),
   title: z.string(),
-  comment: z.string(),
+  comment: z.string().optional(),
   statements: z.array(StatementSchema),
 });
 

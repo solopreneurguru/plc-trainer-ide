@@ -560,7 +560,6 @@ describe('Timer Instructions', () => {
 
       let result = runtime.executeScan();
       const timer1 = result.tagValues['Timer1'] as TimerInstance;
-      const timer2 = result.tagValues['Timer2'] as TimerInstance;
       const startTime = timer1._start_time!;
 
       // After 500ms, Timer2 should be done but Timer1 still running

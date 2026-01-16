@@ -101,7 +101,7 @@ export class StatementExecutor {
         const PT = this.toNumber(this.expressionEvaluator.evaluate(inputs['PT']));
 
         // Execute timer
-        updatedInstance = executeTON(currentInstance, IN, PT, this.currentTime);
+        updatedInstance = executeTON(currentInstance as TimerInstance, IN, PT, this.currentTime);
         break;
       }
 
@@ -111,7 +111,7 @@ export class StatementExecutor {
         const PT = this.toNumber(this.expressionEvaluator.evaluate(inputs['PT']));
 
         // Execute timer
-        updatedInstance = executeTOF(currentInstance, IN, PT, this.currentTime);
+        updatedInstance = executeTOF(currentInstance as TimerInstance, IN, PT, this.currentTime);
         break;
       }
 

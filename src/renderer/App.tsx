@@ -6,13 +6,17 @@ import { useState, useEffect } from 'react';
 import IOPanel from './ui/io/IOPanel';
 import Toolbar from './ui/layout/Toolbar';
 import LadderDemo from './ui/editors/lad/LadderDemo';
+import TagTable from './ui/tags/TagTable';
 import { createDefaultLadderProgram } from '../core/ladder/LadderModel';
+import { TagDefinition, createTag } from '../core/tags/TagDefinition';
 
 interface WatchData {
   scanNumber: number;
   scanDuration: number;
   tagValues: Record<string, any>;
 }
+
+type ViewTab = 'ladder' | 'tags';
 
 function App() {
   const [runtimeStatus, setRuntimeStatus] = useState<'running' | 'stopped'>('stopped');
@@ -21,6 +25,12 @@ function App() {
     scanDuration: 0,
     tagValues: {},
   });
+  const [activeTab, setActiveTab] = useState<ViewTab>('ladder');
+  const [tags, setTags] = useState<TagDefinition[]>([
+    createTag('start_button', 'BOOL', '%I0.0', 'Start button input'),
+    createTag('stop_button', 'BOOL', '%I0.1', 'Stop button input'),
+    createTag('motor_output', 'BOOL', '%Q0.0', 'Motor output'),
+  ]);
 
   // Ladder program for visualization
   const ladderProgram = createDefaultLadderProgram();
@@ -118,11 +128,38 @@ function App() {
 
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Center Panel - Ladder Diagram */}
-        <div className="flex-1 flex flex-col p-6 overflow-auto bg-gray-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 mb-4">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-gray-800">Seal-In Start/Stop Circuit</h2>
+        {/* Center Panel - Tabbed Views */}
+        <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
+          {/* Tab Navigation */}
+          <div className="flex gap-1 px-6 pt-4">
+            <button
+              onClick={() => setActiveTab('ladder')}
+              className={`px-4 py-2 rounded-t-lg font-semibold text-sm transition-colors ${
+                activeTab === 'ladder'
+                  ? 'bg-white text-blue-600 border-t border-x border-gray-300'
+                  : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+              }`}
+            >
+              📊 Ladder Diagram
+            </button>
+            <button
+              onClick={() => setActiveTab('tags')}
+              className={`px-4 py-2 rounded-t-lg font-semibold text-sm transition-colors ${
+                activeTab === 'tags'
+                  ? 'bg-white text-blue-600 border-t border-x border-gray-300'
+                  : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+              }`}
+            >
+              🏷️ Tag Table
+            </button>
+          </div>
+
+          {/* Tab Content */}
+          <div className="flex-1 p-6 pt-0 overflow-auto">
+            {activeTab === 'ladder' && (
+              <div className="bg-white rounded-lg shadow-lg p-6 mt-4 h-full">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold text-gray-800">Seal-In Start/Stop Circuit</h2>
               <div className="flex items-center gap-4 text-sm">
                 <div className="flex items-center gap-2">
                   <span className="text-gray-600">Scan:</span>
@@ -155,8 +192,16 @@ function App() {
               </ol>
             </div>
 
-            {/* Ladder Diagram with Real-Time Animation */}
-            <LadderDemo ladderProgram={ladderProgram} rungHighlights={rungHighlights} />
+                {/* Ladder Diagram with Real-Time Animation */}
+                <LadderDemo ladderProgram={ladderProgram} rungHighlights={rungHighlights} />
+              </div>
+            )}
+
+            {activeTab === 'tags' && (
+              <div className="h-full mt-4">
+                <TagTable tags={tags} onTagsChange={setTags} />
+              </div>
+            )}
           </div>
         </div>
 

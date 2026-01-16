@@ -6,7 +6,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { IRRuntime } from '../IRRuntime';
-import { Program, CounterInstance } from '../../../core/ir/types';
+import { Program } from '../../../core/ir/types';
 import { createEmptyProgram, createOperandExpression, createNumberLiteral, createBoolLiteral } from '../../../core/ir/types';
 
 describe('Counter Instructions', () => {
