@@ -352,7 +352,12 @@ function InstructionPalette({ onSelectInstruction }: InstructionPaletteProps) {
             <button
               key={instruction.id}
               onClick={() => handleInstructionClick(instruction)}
-              className={`w-full text-left p-3 rounded border transition-all ${
+              draggable={true}
+              onDragStart={(e) => {
+                e.dataTransfer.setData('application/json', JSON.stringify(instruction));
+                e.dataTransfer.effectAllowed = 'copy';
+              }}
+              className={`w-full text-left p-3 rounded border transition-all cursor-move ${
                 selectedInstruction?.id === instruction.id
                   ? 'bg-blue-50 border-blue-500 shadow-md'
                   : 'bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300'
@@ -393,8 +398,8 @@ function InstructionPalette({ onSelectInstruction }: InstructionPaletteProps) {
       <div className="mt-3 p-3 bg-blue-50 rounded text-xs text-gray-600">
         <p className="font-semibold mb-1">💡 Tip:</p>
         <p>
-          Click an instruction to view details. Drag-and-drop functionality coming in Phase 1C
-          (Full LAD Editor).
+          Click an instruction to select it, then click a grid cell in the LAD Editor to place it.
+          Or drag-and-drop instructions directly onto the editor grid!
         </p>
       </div>
     </div>

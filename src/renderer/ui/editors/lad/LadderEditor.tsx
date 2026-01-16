@@ -19,6 +19,16 @@ import {
   GridPosition,
   createEmptyRung,
   generateElementId,
+  createContact,
+  createCoil,
+  createTagOperand,
+  createLiteralOperand,
+  createFunctionBlock,
+  createComparison,
+  ContactType,
+  CoilType,
+  FunctionBlockType,
+  ComparisonType,
 } from '../../../../core/ladder/LadderModelFull';
 
 interface LadderEditorProps {
@@ -42,6 +52,196 @@ function LadderEditor({ program, onProgramChange, selectedInstruction }: LadderE
   const network = program.networks[selectedNetwork];
 
   /**
+   * Place an instruction on the grid
+   */
+  const placeInstruction = (instructionId: string, rungIndex: number, position: GridPosition) => {
+    // Prompt for tag name
+    const tagName = prompt(`Enter tag name for ${instructionId}:`);
+    if (!tagName) return; // User cancelled
+
+    let newElement: LadderElement | null = null;
+
+    // Create element based on instruction type
+    switch (instructionId) {
+      case 'XIC':
+        newElement = createContact(
+          generateElementId('contact'),
+          'NO',
+          createTagOperand(tagName),
+          position
+        );
+        break;
+      case 'XIO':
+        newElement = createContact(
+          generateElementId('contact'),
+          'NC',
+          createTagOperand(tagName),
+          position
+        );
+        break;
+      case 'P_EDGE':
+        newElement = createContact(
+          generateElementId('contact'),
+          'P',
+          createTagOperand(tagName),
+          position
+        );
+        break;
+      case 'N_EDGE':
+        newElement = createContact(
+          generateElementId('contact'),
+          'N',
+          createTagOperand(tagName),
+          position
+        );
+        break;
+
+      case 'OTE':
+        newElement = createCoil(
+          generateElementId('coil'),
+          'OTE',
+          createTagOperand(tagName),
+          position
+        );
+        break;
+      case 'OTL':
+        newElement = createCoil(
+          generateElementId('coil'),
+          'OTL',
+          createTagOperand(tagName),
+          position
+        );
+        break;
+      case 'OTU':
+        newElement = createCoil(
+          generateElementId('coil'),
+          'OTU',
+          createTagOperand(tagName),
+          position
+        );
+        break;
+
+      // Function blocks need instance name and default inputs
+      case 'TON':
+      case 'TOF':
+      case 'TP':
+        const ptValue = prompt('Enter preset time (PT) in milliseconds:', '1000');
+        newElement = createFunctionBlock(
+          generateElementId('fb'),
+          instructionId as FunctionBlockType,
+          createTagOperand(tagName), // Instance
+          {
+            IN: createTagOperand('input_tag'),
+            PT: createLiteralOperand(parseInt(ptValue || '1000'), 'TIME'),
+          },
+          {
+            Q: createTagOperand('output_tag'),
+            ET: createTagOperand('elapsed_tag'),
+          },
+          position
+        );
+        break;
+
+      case 'CTU':
+      case 'CTD':
+      case 'CTUD':
+        const pvValue = prompt('Enter preset value (PV):', '10');
+        const inputs: any = {};
+        const outputs: any = {};
+
+        if (instructionId === 'CTU') {
+          inputs.CU = createTagOperand('count_up_input');
+          inputs.R = createTagOperand('reset_input');
+          inputs.PV = createLiteralOperand(parseInt(pvValue || '10'), 'INT');
+          outputs.Q = createTagOperand('done_output');
+          outputs.CV = createTagOperand('current_value');
+        } else if (instructionId === 'CTD') {
+          inputs.CD = createTagOperand('count_down_input');
+          inputs.LD = createTagOperand('load_input');
+          inputs.PV = createLiteralOperand(parseInt(pvValue || '10'), 'INT');
+          outputs.Q = createTagOperand('done_output');
+          outputs.CV = createTagOperand('current_value');
+        } else {
+          // CTUD
+          inputs.CU = createTagOperand('count_up_input');
+          inputs.CD = createTagOperand('count_down_input');
+          inputs.R = createTagOperand('reset_input');
+          inputs.LD = createTagOperand('load_input');
+          inputs.PV = createLiteralOperand(parseInt(pvValue || '10'), 'INT');
+          outputs.QU = createTagOperand('up_done');
+          outputs.QD = createTagOperand('down_done');
+          outputs.CV = createTagOperand('current_value');
+        }
+
+        newElement = createFunctionBlock(
+          generateElementId('fb'),
+          instructionId as FunctionBlockType,
+          createTagOperand(tagName),
+          inputs,
+          outputs,
+          position
+        );
+        break;
+
+      case 'SR':
+      case 'RS':
+        newElement = createFunctionBlock(
+          generateElementId('fb'),
+          instructionId as FunctionBlockType,
+          createTagOperand(tagName),
+          {
+            S: createTagOperand('set_input'),
+            R: createTagOperand('reset_input'),
+          },
+          {
+            Q: createTagOperand('output'),
+          },
+          position
+        );
+        break;
+
+      case 'EQ':
+      case 'NE':
+      case 'LT':
+      case 'GT':
+      case 'LE':
+      case 'GE':
+        newElement = createComparison(
+          generateElementId('cmp'),
+          instructionId as ComparisonType,
+          createTagOperand('value_a'),
+          createTagOperand('value_b'),
+          position
+        );
+        break;
+
+      default:
+        alert(`Instruction ${instructionId} not yet implemented in editor`);
+        return;
+    }
+
+    if (!newElement) return;
+
+    // Add element to rung
+    const updatedRung: LadderRung = {
+      ...network.rungs[rungIndex],
+      elements: [...network.rungs[rungIndex].elements, newElement],
+    };
+
+    const updatedNetwork: LadderNetwork = {
+      ...network,
+      rungs: network.rungs.map((r, i) => (i === rungIndex ? updatedRung : r)),
+    };
+
+    const updatedProgram: LadderProgramFull = {
+      ...program,
+      networks: program.networks.map((n, i) => (i === selectedNetwork ? updatedNetwork : n)),
+    };
+
+    onProgramChange?.(updatedProgram);
+  };
+
+  /**
    * Handle cell click - place selected instruction
    */
   const handleCellClick = (rungIndex: number, position: GridPosition) => {
@@ -49,20 +249,27 @@ function LadderEditor({ program, onProgramChange, selectedInstruction }: LadderE
       return;
     }
 
-    // TODO: Create ladder element based on selected instruction
-    // For now, just show console log
-    console.log(
-      `Place ${selectedInstruction.name} at rung ${rungIndex}, pos (${position.row}, ${position.col})`
-    );
+    placeInstruction(selectedInstruction.id, rungIndex, position);
+  };
 
-    // Example: Add a contact element
-    // const element = createContact(
-    //   generateElementId('contact'),
-    //   'NO',
-    //   createTagOperand('tag_name'),
-    //   position
-    // );
-    // ... add to rung and update program
+  /**
+   * Handle drag and drop
+   */
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+  };
+
+  const handleDrop = (e: React.DragEvent, rungIndex: number, position: GridPosition) => {
+    e.preventDefault();
+
+    try {
+      const data = e.dataTransfer.getData('application/json');
+      const instruction = JSON.parse(data);
+      placeInstruction(instruction.id, rungIndex, position);
+    } catch (error) {
+      console.error('Failed to parse dropped instruction:', error);
+    }
   };
 
   /**
@@ -135,6 +342,8 @@ function LadderEditor({ program, onProgramChange, selectedInstruction }: LadderE
         onClick={() => handleCellClick(rungIndex, { row, col })}
         onMouseEnter={() => setHoveredCell({ row, col })}
         onMouseLeave={() => setHoveredCell(null)}
+        onDragOver={handleDragOver}
+        onDrop={(e) => handleDrop(e, rungIndex, { row, col })}
       >
         {element && renderElement(element)}
       </div>
