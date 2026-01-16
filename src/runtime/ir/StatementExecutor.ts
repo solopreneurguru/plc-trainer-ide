@@ -5,10 +5,11 @@
  * Writes results to pending buffer (commits at end of scan).
  */
 
-import { Statement, Operand, TimerInstance, CallStatement } from '../../core/ir/types';
+import { Statement, Operand, TimerInstance, CounterInstance, CallStatement } from '../../core/ir/types';
 import { TagStore, TagValue } from './TagStore';
 import { ExpressionEvaluator } from './ExpressionEvaluator';
 import { executeTON, executeTOF, executeTP } from './instructions/timers';
+import { executeCTU, executeCTD, executeCTUD } from './instructions/counters';
 
 export class StatementExecutor {
   private expressionEvaluator: ExpressionEvaluator;
@@ -82,13 +83,14 @@ export class StatementExecutor {
     }
     const instanceTagId = this.resolveOperandToTagId(instance);
 
-    // Get current timer instance (or undefined if not initialized)
+    // Get current instance (timer or counter)
     const currentInstance = this.tagStore.readFromPendingOrSnapshot(instanceTagId) as
       | TimerInstance
+      | CounterInstance
       | undefined;
 
-    // Execute timer based on function name
-    let updatedInstance: TimerInstance | undefined;
+    // Execute function based on function name
+    let updatedInstance: TimerInstance | CounterInstance | undefined;
 
     switch (function_name) {
       case 'TON': {
@@ -117,7 +119,42 @@ export class StatementExecutor {
         const PT = this.toNumber(this.expressionEvaluator.evaluate(inputs['PT']));
 
         // Execute timer
-        updatedInstance = executeTP(currentInstance, IN, PT, this.currentTime);
+        updatedInstance = executeTP(currentInstance as TimerInstance, IN, PT, this.currentTime);
+        break;
+      }
+
+      case 'CTU': {
+        // Evaluate inputs
+        const CU = this.toBoolean(this.expressionEvaluator.evaluate(inputs['CU']));
+        const R = this.toBoolean(this.expressionEvaluator.evaluate(inputs['R']));
+        const PV = this.toNumber(this.expressionEvaluator.evaluate(inputs['PV']));
+
+        // Execute counter
+        updatedInstance = executeCTU(currentInstance as CounterInstance, CU, R, PV);
+        break;
+      }
+
+      case 'CTD': {
+        // Evaluate inputs
+        const CD = this.toBoolean(this.expressionEvaluator.evaluate(inputs['CD']));
+        const LD = this.toBoolean(this.expressionEvaluator.evaluate(inputs['LD']));
+        const PV = this.toNumber(this.expressionEvaluator.evaluate(inputs['PV']));
+
+        // Execute counter
+        updatedInstance = executeCTD(currentInstance as CounterInstance, CD, LD, PV);
+        break;
+      }
+
+      case 'CTUD': {
+        // Evaluate inputs
+        const CU = this.toBoolean(this.expressionEvaluator.evaluate(inputs['CU']));
+        const CD = this.toBoolean(this.expressionEvaluator.evaluate(inputs['CD']));
+        const R = this.toBoolean(this.expressionEvaluator.evaluate(inputs['R']));
+        const LD = this.toBoolean(this.expressionEvaluator.evaluate(inputs['LD']));
+        const PV = this.toNumber(this.expressionEvaluator.evaluate(inputs['PV']));
+
+        // Execute counter
+        updatedInstance = executeCTUD(currentInstance as CounterInstance, CU, CD, R, LD, PV);
         break;
       }
 
@@ -131,13 +168,28 @@ export class StatementExecutor {
     }
 
     // Write outputs to their respective tags
+    // Timer outputs
     if (outputs['Q']) {
       const outputTagId = this.resolveOperandToTagId(outputs['Q']);
-      this.tagStore.writeToPending(outputTagId, updatedInstance?.Q || false);
+      this.tagStore.writeToPending(outputTagId, (updatedInstance as any)?.Q || false);
     }
     if (outputs['ET']) {
       const outputTagId = this.resolveOperandToTagId(outputs['ET']);
-      this.tagStore.writeToPending(outputTagId, updatedInstance?.ET || 0);
+      this.tagStore.writeToPending(outputTagId, (updatedInstance as any)?.ET || 0);
+    }
+
+    // Counter outputs (CTU/CTD use Q, CTUD uses QU/QD)
+    if (outputs['QU']) {
+      const outputTagId = this.resolveOperandToTagId(outputs['QU']);
+      this.tagStore.writeToPending(outputTagId, (updatedInstance as any)?.QU || false);
+    }
+    if (outputs['QD']) {
+      const outputTagId = this.resolveOperandToTagId(outputs['QD']);
+      this.tagStore.writeToPending(outputTagId, (updatedInstance as any)?.QD || false);
+    }
+    if (outputs['CV']) {
+      const outputTagId = this.resolveOperandToTagId(outputs['CV']);
+      this.tagStore.writeToPending(outputTagId, (updatedInstance as any)?.CV || 0);
     }
   }
 
